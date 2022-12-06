@@ -1,4 +1,29 @@
 {
-  "components": {},
-  "dependencies": {}
+  "components": {
+    "seeds": {
+      "PetriNet": {
+        "src": "src/seeds/PetriNet"
+      }
+    },
+    "plugins": {
+      "PetriNetPlugin": {
+        "src": "src/plugins/PetriNetPlugin",
+        "test": "test/plugins/PetriNetPlugin"
+      }
+    },
+    "visualizers": {
+      "PetriNetViz": {
+        "src": "panels/PetriNetViz/PetriNetVizPanel",
+        "title": "PetriNetViz",
+        "panel": "src/visualizers/panels/PetriNetViz",
+        "secondary": false,
+        "widget": "src/visualizers/widgets/PetriNetViz"
+      }
+    }
+  },
+  "dependencies": {
+    "seeds": {},
+    "plugins": {},
+    "visualizers": {}
+  }
 }
