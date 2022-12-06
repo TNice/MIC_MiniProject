@@ -75,6 +75,7 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
     // };
 
     PetriNetVizWidget.prototype.initNetwork = function (networkDescriptor){
+        const self = this;
         console.log(networkDescriptor);
 
         self._webgmePN = networkDescriptor;
@@ -87,7 +88,7 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                 size: { width: 60, height: 60 },
                 attrs: {
                     label : {
-                        text: pn.place[pId].name + ' - ' + pn.place[pId].marking,
+                        text: pn.places[pId].name + ' - ' + pn.places[pId].marking,
                         fontWeight: 'bold',
                     },
                     body: {
@@ -109,7 +110,7 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                         fontWeight: 'bold',
                     },
                     body: {
-                        strokeWidth: 3
+                        strokeWidth: 3,
                     }
                 }
             })
@@ -152,7 +153,7 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                 transition.jointNext[nextId] = link;
             });
         });
-
+        console.log(self._jointPN)
         self._jointPaper.updateViews();
         self._decorateNetwork();
     };
@@ -162,10 +163,46 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
     };
 
 
+    PetriNetVizWidget.prototype.AddMark = function () {
+        const pn = this._webgmePN;
+        Object.keys(pn.places).forEach(pId => {
+            pn.places[pId].marking += 1;
+        });
+        this._decorateNetwork();
+    };
+
+    PetriNetVizWidget.prototype.SubMark = function () {
+        const pn = this._webgmePN;
+        Object.keys(pn.places).forEach(pId => {
+            pn.places[pId].marking -= 1;
+        });
+        this._decorateNetwork();
+    };
+
     PetriNetVizWidget.prototype._decorateNetwork = function () {
         const pn = this._webgmePN;
-        Object.keys(sm.places).forEach(pId => {
-            sm.places[pId].joint.attr('label/text', pn.place[pId].name + ' - ' + pn.place[pId].marking);
+        Object.keys(pn.places).forEach(pId => {
+            pn.places[pId].joint.attr('label/text', pn.places[pId].name + ' - ' + pn.places[pId].marking);
+        });
+        Object.keys(pn.transitions).forEach(tId => {
+            let active = true;
+            pn.transitions[tId].prev.forEach(prevPlace => {
+                if (prevPlace.marking == 0){
+                    active = false; 
+                }
+            });
+
+            if(active){
+                pn.transitions[tId].joint.attr('body/fill', '#00FF00')
+                pn.transitions[tId].joint.attr('body/cursor', 'pointer')
+                pn.transitions[tId].joint.attr('label/cursor', 'pointer')
+                pn.transitions[tId].joint.attr('body/event', 'element:label:pointerdown')
+            }else{
+                pn.transitions[tId].joint.attr('body/fill', '#FF0000')
+                pn.transitions[tId].joint.attr('body/event', '')
+                pn.transitions[tId].joint.attr('body/cursor', '')
+                pn.transitions[tId].joint.attr('label/cursor', '')
+            }
         });
     };
 

@@ -190,34 +190,39 @@ define([
         const pn = {places: {}, transitions: {}};
         elementIds.forEach(id => {
             const node = self._client.getNode(id);
-            if (node.isTypeOf(META['Place'])){
-                const place = {name: node.getAttribute('name'), next:{}, position: node.getReistry('position'), marking: node.getAttribute('marking')};
+            if (node.isTypeOf(META['Transition'])){
+                const transition = {name: node.getAttribute('name'), next:{}, position: node.getRegistry('position'), prev: []};
 
                 elementIds.forEach(nextId => {
                     const nextNode = self._client.getNode(nextId);
                     if(nextNode.isTypeOf(META['Arc']) && nextNode.getPointerId('src') === id) {
-                        place.next[nextNode.getAttribute('name')] = nextNode.getPointerId('dst');
-                    }
-                });
-                pn.places[id] = place;
-            } 
-            else if (node.isTypeOf(META['Transition'])){
-                const transition = {name: node.getAttribute('name'), next:{}, position: node.getReistry('position')};
-
-                elementIds.forEach(nextId => {
-                    const nextNode = self._client.getNode(nextId);
-                    if(nextNode.isTypeOf(META['Arc']) && nextNode.getPointerId('src') === id) {
-                        transition.next[nextNode.getAttribute('name')] = nextNode.getPointerId('dst');
+                        transition.next[nextNode.getPointerId('dst')] = nextNode.getPointerId('dst');
                     }
                 });
                 pn.transitions[id] = transition;
             }
         });
 
+        elementIds.forEach(id => {
+            const node = self._client.getNode(id);
+            if (node.isTypeOf(META['Place'])){
+                const place = {name: node.getAttribute('name'), next:{}, position: node.getRegistry('position'), marking: node.getAttribute('marking')};
+                elementIds.forEach(nextId => {
+                    const nextNode = self._client.getNode(nextId);
+                    if(nextNode.isTypeOf(META['Arc']) && nextNode.getPointerId('src') === id) {
+                        place.next[nextNode.getPointerId('dst')] = nextNode.getPointerId('dst');
+                        pn.transitions[nextNode.getPointerId('dst')].prev.push(place)
+                    }
+                });
+                pn.places[id] = place;
+            }
+        });
+
         self._widget.initNetwork(pn);
+        console.log(pn)
     };
 
-    PetriNetVizControl.prototype.clearPN() = function () {
+    PetriNetVizControl.prototype.clearPN = function () {
         const self = this;
         self._networkRootLoaded = false;
         self._widget.destroyNetwork();
@@ -293,13 +298,36 @@ define([
         /************** Go to hierarchical parent button ****************/
         this.$btnReset = toolBar.addButton({
             title: 'Reset Network',
-            icon: 'glyphicon glyphicon-circle-arrow-up',
+            icon: 'glyphicon glyphicon-flash',
             clickFn: function (/*data*/) {
                 //WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
+                self._initPN();
                 console.log("Reset Our Network");
             }
         });
         this._toolbarItems.push(this.$btnReset);
+
+        this.$btnAdd = toolBar.addButton({
+            title: 'Add Marking To All Places Network',
+            icon: 'glyphicon glyphicon-circle-arrow-right',
+            clickFn: function (/*data*/) {
+                //WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
+                self._widget.AddMark();
+                console.log("Reset Our Network");
+            }
+        });
+        this._toolbarItems.push(this.$btnAdd);
+
+        this.$btnSub = toolBar.addButton({
+            title: 'Subtract Marking To All Places Network',
+            icon: 'glyphicon glyphicon-circle-arrow-left',
+            clickFn: function (/*data*/) {
+                //WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
+                self._widget.SubMark();
+                console.log("Reset Our Network");
+            }
+        });
+        this._toolbarItems.push(this.$btnSub);
         //this.$btnModelHierarchyUp.hide();
 
         /************** Checkbox example *******************/
