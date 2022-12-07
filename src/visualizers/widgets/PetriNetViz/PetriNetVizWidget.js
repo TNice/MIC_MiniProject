@@ -40,6 +40,22 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
             interactive: false
         });
 
+        this._jointPaper.on('transition:pointerdown', function(elementView){
+            const currentElement = elementView.model;
+            const pn = self._webgmePN;
+            if (pn){
+                Object.keys(pn.transitions).every(tId => {
+                    if(pn.transitions[tId].joint === currentElement){
+                        self.fireTransition(tId);
+                        return false;
+                    }
+
+                    return true;
+                });
+                
+            }
+        });
+
         this._webgmePN = null;
 
         // Registering to events can be done with jQuery (as normal)
@@ -162,19 +178,27 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
         this._decorateNetwork();
     };
 
-
-    PetriNetVizWidget.prototype.AddMark = function () {
+    PetriNetVizWidget.prototype.fireTransition = function (tId) {
         const pn = this._webgmePN;
-        Object.keys(pn.places).forEach(pId => {
+        const transition = pn.transitions[tId]
+        let active = true;
+        pn.transitions[tId].prev.forEach(prevPlace => {
+            if (prevPlace.marking == 0){
+                active = false; 
+            }
+        });
+
+        if(!active){
+            return;
+        }
+
+        Object.keys(transition.next).forEach(pId => {
+            let val = pn.places[pId].marking;
+            console.log(val);
             pn.places[pId].marking += 1;
         });
-        this._decorateNetwork();
-    };
-
-    PetriNetVizWidget.prototype.SubMark = function () {
-        const pn = this._webgmePN;
-        Object.keys(pn.places).forEach(pId => {
-            pn.places[pId].marking -= 1;
+        transition.prev.forEach(prevPlace => {
+            prevPlace.marking -= 1;
         });
         this._decorateNetwork();
     };
@@ -196,7 +220,7 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                 pn.transitions[tId].joint.attr('body/fill', '#00FF00')
                 pn.transitions[tId].joint.attr('body/cursor', 'pointer')
                 pn.transitions[tId].joint.attr('label/cursor', 'pointer')
-                pn.transitions[tId].joint.attr('body/event', 'element:label:pointerdown')
+                pn.transitions[tId].joint.attr('body/event', 'transition:pointerdown')
             }else{
                 pn.transitions[tId].joint.attr('body/fill', '#FF0000')
                 pn.transitions[tId].joint.attr('body/event', '')
@@ -232,6 +256,9 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
 
     /* * * * * * * * Visualizer life cycle callbacks * * * * * * * */
     PetriNetVizWidget.prototype.destroy = function () {
+    };
+
+    PetriNetVizWidget.prototype.destroyNetwork = function () {
     };
 
     PetriNetVizWidget.prototype.onActivate = function () {

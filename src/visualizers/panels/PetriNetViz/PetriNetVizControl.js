@@ -307,28 +307,25 @@ define([
         });
         this._toolbarItems.push(this.$btnReset);
 
-        this.$btnAdd = toolBar.addButton({
-            title: 'Add Marking To All Places Network',
+        this.$btnClassify = toolBar.addButton({
+            title: 'Classify Petri Net',
             icon: 'glyphicon glyphicon-circle-arrow-right',
             clickFn: function (/*data*/) {
                 //WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
-                self._widget.AddMark();
-                console.log("Reset Our Network");
+                console.log("Run Plugin");
+                const context = self._client.getCurrentPluginContext('PetriNetPlugin', self._currentNodeId, []);
+                context.pluginContext = {};
+                self._client.runServerPlugin(
+                    'PetriNetPlugin',
+                    context,
+                    function(err, result){
+                        console.log('plugin err:', err);
+                        console.log('plugin result:', result);
+                    }
+                );
             }
         });
-        this._toolbarItems.push(this.$btnAdd);
-
-        this.$btnSub = toolBar.addButton({
-            title: 'Subtract Marking To All Places Network',
-            icon: 'glyphicon glyphicon-circle-arrow-left',
-            clickFn: function (/*data*/) {
-                //WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
-                self._widget.SubMark();
-                console.log("Reset Our Network");
-            }
-        });
-        this._toolbarItems.push(this.$btnSub);
-        //this.$btnModelHierarchyUp.hide();
+        this._toolbarItems.push(this.$btnClassify);
 
         /************** Checkbox example *******************/
 
