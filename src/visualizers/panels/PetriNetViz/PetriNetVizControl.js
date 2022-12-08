@@ -314,7 +314,7 @@ define([
                 //WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
                 console.log("Run Plugin");
                 const context = self._client.getCurrentPluginContext('PetriNetPlugin', self._currentNodeId, []);
-                context.pluginContext = {};
+                context.pluginConfig = {};
                 self._client.runServerPlugin(
                     'PetriNetPlugin',
                     context,

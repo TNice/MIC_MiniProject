@@ -20,5 +20,6 @@ class PetriNetPlugin(PluginBase):
     def main(self):
         core = self.core
         root_node = self.root_node
+        active_node = self.active_node
 
-        self.send_notification('This is a test')
+        self.send_notification('Test')

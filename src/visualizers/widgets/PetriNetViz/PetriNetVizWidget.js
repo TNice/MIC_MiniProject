@@ -26,6 +26,16 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
             height = this._el.height(),
             self = this;
 
+        var verticesTool = new joint.linkTools.Vertices();
+        var segmentsTool = new joint.linkTools.Segments();
+        //var boundaryTool = new joint.linkTools.Boundary();
+
+        // var toolsView = new joint.dia.ToolsView({
+        //     tools: [
+        //         verticesTool, segmentsTool
+        //     ]
+        // });
+
         // set widget class
         this._el.addClass(WIDGET_CLASS);
 
@@ -55,6 +65,14 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                 
             }
         });
+        
+        // this._jointPaper.on('link:mouseenter', function(linkView){
+        //     linkView.addTools(toolsView);
+        // });
+
+        // this._jointPaper.on('link:mouseleave', function(linkView){
+        //     linkView.removeTools();
+        // });
 
         this._webgmePN = null;
 
@@ -134,6 +152,8 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
             pn.transitions[tId].joint = vertex;
         });
 
+        var routerType = 'manhattan'
+
         Object.keys(pn.places).forEach(pId => {
             const place = pn.places[pId];
             Object.keys(place.next).forEach(nextId => {
@@ -147,6 +167,8 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                         }
                     }
                 });
+                link.router(routerType);
+                link.connector('rounded');
                 link.addTo(self._jointPN);
                 place.jointNext[nextId] = link;
             });
@@ -165,6 +187,8 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                         }
                     }
                 });
+                link.router(routerType);
+                link.connector('rounded');
                 link.addTo(self._jointPN);
                 transition.jointNext[nextId] = link;
             });
@@ -221,9 +245,11 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                 pn.transitions[tId].joint.attr('body/cursor', 'pointer')
                 pn.transitions[tId].joint.attr('label/cursor', 'pointer')
                 pn.transitions[tId].joint.attr('body/event', 'transition:pointerdown')
+                pn.transitions[tId].joint.attr('label/event', 'transition:pointerdown')
             }else{
                 pn.transitions[tId].joint.attr('body/fill', '#FF0000')
                 pn.transitions[tId].joint.attr('body/event', '')
+                pn.transitions[tId].joint.attr('label/event', '')
                 pn.transitions[tId].joint.attr('body/cursor', '')
                 pn.transitions[tId].joint.attr('label/cursor', '')
             }
