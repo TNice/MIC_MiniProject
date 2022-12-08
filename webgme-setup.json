@@ -3,6 +3,9 @@
     "seeds": {
       "PetriNet": {
         "src": "src/seeds/PetriNet"
+      },
+      "PetriNetWithSamples": {
+        "src": "src/seeds/PetriNetWithSamples"
       }
     },
     "plugins": {
