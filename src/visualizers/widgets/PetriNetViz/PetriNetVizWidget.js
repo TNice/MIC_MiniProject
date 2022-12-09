@@ -14,6 +14,8 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
 
         this._el = container;
 
+        this._contol = null;
+
         this.nodes = {};
         this._initialize();
 
@@ -21,26 +23,17 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
     }
 
     PetriNetVizWidget.prototype._initialize = function () {
-        console.log(joint);
         var width = this._el.width(),
             height = this._el.height(),
             self = this;
 
         var verticesTool = new joint.linkTools.Vertices();
         var segmentsTool = new joint.linkTools.Segments();
-        //var boundaryTool = new joint.linkTools.Boundary();
-
-        // var toolsView = new joint.dia.ToolsView({
-        //     tools: [
-        //         verticesTool, segmentsTool
-        //     ]
-        // });
+        
 
         // set widget class
         this._el.addClass(WIDGET_CLASS);
-
-        // Create a dummy header
-       // this._el.append('<h3>PetriNetViz Events:</h3>');
+        
         this._jointPN = new joint.dia.Graph;
         this._jointPaper = new joint.dia.Paper({
             el: this._el,
@@ -61,52 +54,16 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                     }
 
                     return true;
-                });
-                
+                });      
             }
         });
-        
-        // this._jointPaper.on('link:mouseenter', function(linkView){
-        //     linkView.addTools(toolsView);
-        // });
-
-        // this._jointPaper.on('link:mouseleave', function(linkView){
-        //     linkView.removeTools();
-        // });
 
         this._webgmePN = null;
-
-        // Registering to events can be done with jQuery (as normal)
-        // this._el.on('dblclick', function (event) {
-        //     event.stopPropagation();
-        //     event.preventDefault();
-        //     self.onBackgroundDblClick();
-        // });
     };
 
     PetriNetVizWidget.prototype.onWidgetContainerResize = function (width, height) {
         this._logger.debug('Widget is resizing...');
     };
-
-    // Adding/Removing/Updating items
-    // PetriNetVizWidget.prototype.addNode = function (desc) {
-    //     if (desc) {
-    //         // Add node to a table of nodes
-    //         var node = document.createElement('div'),
-    //             label = 'children';
-
-    //         if (desc.childrenIds.length === 1) {
-    //             label = 'child';
-    //         }
-
-    //         this.nodes[desc.id] = desc;
-    //         node.innerHTML = 'Adding node "' + desc.name + '" (click to view). It has ' +
-    //             desc.childrenIds.length + ' ' + label + '.';
-
-    //         this._el.append(node);
-    //         node.onclick = this.onNodeClick.bind(this, desc.id);
-    //     }
-    // };
 
     PetriNetVizWidget.prototype.initNetwork = function (networkDescriptor){
         const self = this;
@@ -232,12 +189,14 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
         Object.keys(pn.places).forEach(pId => {
             pn.places[pId].joint.attr('label/text', pn.places[pId].name + ' - ' + pn.places[pId].marking);
         });
+
+        let deadlock = true;
         Object.keys(pn.transitions).forEach(tId => {
             let active = true;
             pn.transitions[tId].prev.forEach(prevPlace => {
                 if (prevPlace.marking == 0){
-                    active = false; 
-                }
+                    active = false;
+                } 
             });
 
             if(active){
@@ -253,7 +212,11 @@ define(['jointjs', 'css!./styles/PetriNetVizWidget.css'], function (joint) {
                 pn.transitions[tId].joint.attr('body/cursor', '')
                 pn.transitions[tId].joint.attr('label/cursor', '')
             }
+
+            if(active) deadlock = false;
         });
+
+        if(deadlock) this._control.runDeadlockCheck();
     };
 
     // PetriNetVizWidget.prototype.removeNode = function (gmeId) {

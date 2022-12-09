@@ -12,6 +12,10 @@
       "PetriNetPlugin": {
         "src": "src/plugins/PetriNetPlugin",
         "test": "test/plugins/PetriNetPlugin"
+      },
+      "CheckDeadlock": {
+        "src": "src/plugins/CheckDeadlock",
+        "test": "test/plugins/CheckDeadlock"
       }
     },
     "visualizers": {
